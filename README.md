@@ -262,7 +262,7 @@ git clone https://github.com/victorwhale/btlx-parser
 cd btlx-parser
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest --cov=btlx          # 37 tests, ~99% coverage
+pytest --cov=btlx          # 46 tests, ~99% coverage
 ```
 
 A demo file lives in [`examples/sample.btlx`](examples/sample.btlx).
@@ -271,5 +271,6 @@ A demo file lives in [`examples/sample.btlx`](examples/sample.btlx).
 
 MIT — see [LICENSE](LICENSE). Contributions welcome.
 
-BTLx is a format by [design2machine.com](https://www.design2machine.com); this
-project is an independent, unofficial parser.
+Built and maintained by **[JAIKIN](https://jaikin.eu/ressources)**. BTLx is a
+format by [design2machine.com](https://www.design2machine.com); this project is
+an independent, unofficial parser.

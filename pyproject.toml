@@ -9,7 +9,7 @@ description = "Parser for the BTLx timber-construction exchange format (Hundegge
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
-authors = [{ name = "btlx-parser contributors" }]
+authors = [{ name = "JAIKIN" }]
 keywords = [
     "btlx", "btl", "timber", "carpentry", "holzbau", "charpente",
     "hundegger", "cnc", "woodworking", "cad-cam", "design2machine",
