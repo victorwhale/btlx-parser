@@ -13,10 +13,10 @@ import sys
 from typing import List, Optional
 
 from . import __version__
-from .aggregate import cut_list, summary
+from .aggregate import summary
 from .errors import BtlxError
-from .exporters import cutlist_csv, to_json
-from .parser import parse_file
+from .exporters import cutlist_csv, parts_csv, to_json
+from .parser import parse_file, parse_string
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -27,7 +27,10 @@ def _build_parser() -> argparse.ArgumentParser:
             "/ BTLx-Parser — Holzbau."
         ),
     )
-    parser.add_argument("file", help="Fichier .btlx / .btlx file / .btlx-Datei")
+    parser.add_argument(
+        "file",
+        help="Fichier .btlx, ou '-' pour stdin / .btlx file, or '-' for stdin",
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--json", action="store_true", help="Sortie JSON complète / full JSON output"
@@ -36,6 +39,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--cutlist",
         action="store_true",
         help="Liste de débit CSV / cut list CSV / Stückliste CSV",
+    )
+    group.add_argument(
+        "--parts",
+        action="store_true",
+        help="Liste détaillée des pièces CSV / detailed parts CSV",
     )
     group.add_argument(
         "--summary",
@@ -90,7 +98,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        doc = parse_file(args.file)
+        if args.file == "-":
+            doc = parse_string(sys.stdin.read())
+        else:
+            doc = parse_file(args.file)
     except BtlxError as exc:
         sys.stderr.write(f"Erreur / Error / Fehler : {exc}\n")
         return 2
@@ -99,6 +110,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         _emit(to_json(doc), args.output)
     elif args.cutlist:
         _emit(cutlist_csv(doc), args.output)
+    elif args.parts:
+        _emit(parts_csv(doc), args.output)
     else:
         _emit(_render_summary(doc), args.output)
     return 0

@@ -11,8 +11,17 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Iterable, Optional, Union
 
+from ._utils import to_float
 from .errors import BtlxParseError
-from .model import BtlxFile, FileDescription, Part, Processing, Project, freeze
+from .model import (
+    BtlxFile,
+    FileDescription,
+    Part,
+    Position,
+    Processing,
+    Project,
+    freeze,
+)
 
 PathLike = Union[str, Path]
 
@@ -107,10 +116,32 @@ _PART_STRUCTURAL_TAGS = {
 }
 
 
+def _parse_position(part_el: ET.Element) -> Optional[Position]:
+    """Lit le point de référence (X/Y/Z) sous <Transformations>."""
+    transforms = _find(part_el, "Transformations")
+    if transforms is None:
+        return None
+    transform = _find(transforms, "Transformation")
+    if transform is None:
+        return None
+    position = _find(transform, "Position")
+    if position is None:
+        return None
+    ref = _find(position, "ReferencePoint")
+    if ref is None:
+        return None
+    return Position(
+        x=to_float(ref.get("X"), 0.0) or 0.0,
+        y=to_float(ref.get("Y"), 0.0) or 0.0,
+        z=to_float(ref.get("Z"), 0.0) or 0.0,
+    )
+
+
 def _parse_part(part_el: ET.Element) -> Part:
     return Part(
         attrs=freeze(dict(part_el.attrib)),
         processings=_parse_processings(part_el),
+        position=_parse_position(part_el),
     )
 
 

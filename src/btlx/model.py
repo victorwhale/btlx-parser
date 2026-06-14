@@ -43,6 +43,44 @@ class Project:
     comment: str = ""
 
 
+# Classement des usinages BTLx par grande famille, pour filtrer facilement.
+# Classify BTLx processings into coarse families for easy filtering.
+PROCESSING_CATEGORIES: Mapping[str, str] = MappingProxyType(
+    {
+        # coupes / cuts
+        "JackRafterCut": "cut",
+        "Cut": "cut",
+        "DoubleCut": "cut",
+        "EndCut": "cut",
+        "ChamferCut": "cut",
+        "ShoulderCut": "cut",
+        "LongitudinalCut": "cut",
+        # perçages / drillings
+        "Drilling": "drilling",
+        "Hole": "drilling",
+        # assemblages / joints
+        "Mortise": "joint",
+        "Tenon": "joint",
+        "Lap": "joint",
+        "Slot": "joint",
+        "Step": "joint",
+        "House": "joint",
+        "Cross": "joint",
+        "DovetailMortise": "joint",
+        "DovetailTenon": "joint",
+        "BridleJoint": "joint",
+        "ScarfJoint": "joint",
+        # poches / contours
+        "Pocket": "pocket",
+        "Profile": "pocket",
+        "FreeContour": "pocket",
+        # marquage / texte
+        "Marking": "marking",
+        "Text": "marking",
+    }
+)
+
+
 @dataclass(frozen=True)
 class Processing:
     """Un usinage appliqué à une pièce (coupe, perçage, tenon, mortaise...).
@@ -56,11 +94,29 @@ class Processing:
     name: str = ""
     params: Mapping[str, str] = field(default_factory=lambda: _EMPTY)
 
+    @property
+    def category(self) -> str:
+        """Famille de l'usinage : cut, drilling, joint, pocket, marking, other."""
+        return PROCESSING_CATEGORIES.get(self.type, "other")
+
     def param_float(self, key: str, default: Optional[float] = None) -> Optional[float]:
         return to_float(self.params.get(key), default)
 
     def param_int(self, key: str, default: Optional[int] = None) -> Optional[int]:
         return to_int(self.params.get(key), default)
+
+
+@dataclass(frozen=True)
+class Position:
+    """Point de référence de la pièce dans le bâtiment (mm).
+
+    Issu de <Transformations><Transformation><Position><ReferencePoint>.
+    Utile pour le placement à l'assemblage.
+    """
+
+    x: float
+    y: float
+    z: float
 
 
 @dataclass(frozen=True)
@@ -73,6 +129,7 @@ class Part:
 
     attrs: Mapping[str, str] = field(default_factory=lambda: _EMPTY)
     processings: Tuple[Processing, ...] = ()
+    position: Optional[Position] = None
 
     # --- Identité ---------------------------------------------------------
     @property
@@ -132,6 +189,15 @@ class Part:
     def cross_section(self) -> str:
         """Section transversale normalisée, ex. '80x160'."""
         return f"{round(self.width)}x{round(self.height)}"
+
+    def processings_of(self, category: str) -> Tuple[Processing, ...]:
+        """Usinages d'une catégorie donnée (cut, drilling, joint, ...)."""
+        return tuple(p for p in self.processings if p.category == category)
+
+    @property
+    def has_joinery(self) -> bool:
+        """Vrai si la pièce comporte au moins un assemblage."""
+        return any(p.category == "joint" for p in self.processings)
 
 
 @dataclass(frozen=True)

@@ -1,5 +1,9 @@
 # btlx-parser
 
+[![CI](https://github.com/victorwhale/btlx-parser/actions/workflows/ci.yml/badge.svg)](https://github.com/victorwhale/btlx-parser/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 > 🇩🇪 [Deutsch](#deutsch) · 🇬🇧 [English](#english) · 🇫🇷 [Français](#français)
 
 A tiny, dependency-free **BTLx parser** for the timber-construction industry.
@@ -16,9 +20,10 @@ btlx my-roof.btlx --cutlist
 - ✅ Zero runtime dependencies (Python stdlib only)
 - ✅ Namespace- and version-agnostic (BTLx 1.x / 2.x)
 - ✅ Hardened against XXE / billion-laughs attacks
-- ✅ Library **and** command-line tool
-- ✅ Exports: structured `dict`, JSON, CSV cut list
-- ✅ 99% test coverage, MIT licensed
+- ✅ Library **and** command-line tool (reads files or stdin)
+- ✅ Typed model with part **positions** and processing **categories**
+- ✅ Exports: structured `dict`, JSON, CSV cut list, CSV parts list
+- ✅ Typed package (`py.typed`), 99% test coverage, MIT licensed
 
 ---
 
@@ -107,9 +112,11 @@ pip install "btlx-parser[secure]"
 
 ```bash
 btlx file.btlx              # human-readable summary (default)
-btlx file.btlx --cutlist    # cut list as CSV
+btlx file.btlx --cutlist    # grouped cut list as CSV
+btlx file.btlx --parts      # detailed parts list as CSV
 btlx file.btlx --json       # full structured JSON
 btlx file.btlx --json -o out.json
+cat file.btlx | btlx -      # read from stdin
 ```
 
 ### As a library
@@ -124,9 +131,12 @@ print(doc.version, doc.project.name, doc.part_count)
 for part in doc.parts:
     print(part.designation, part.cross_section, part.length, "mm")
     print("  volume:", part.volume_m3, "m³  weight:", part.weight, "kg")
+    print("  position:", part.position)        # ReferencePoint X/Y/Z in mm, or None
+    print("  needs joinery:", part.has_joinery)
     for proc in part.processings:
         # proc.type e.g. "JackRafterCut", "Drilling", "Mortise", "Tenon"
-        print("  ", proc.type, proc.param_float("Angle"))
+        # proc.category e.g. "cut", "drilling", "joint", "pocket", "marking"
+        print("  ", proc.category, proc.type, proc.param_float("Angle"))
 
 # Aggregates
 print(btlx.total_volume_m3(doc))       # total timber volume (m³)
@@ -136,6 +146,7 @@ print(btlx.summary(doc))               # JSON-ready summary dict
 # Exports
 print(btlx.to_json(doc))               # full document as JSON
 print(btlx.cutlist_csv(doc))           # grouped cut list as CSV
+print(btlx.parts_csv(doc))             # detailed parts list as CSV
 ```
 
 ### Data model
@@ -247,7 +258,7 @@ millimètres, les volumes en m³, les poids en kg.
 ## Development
 
 ```bash
-git clone https://github.com/your-org/btlx-parser
+git clone https://github.com/victorwhale/btlx-parser
 cd btlx-parser
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"

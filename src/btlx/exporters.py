@@ -25,8 +25,19 @@ def part_to_dict(part: Part) -> dict:
         "cross_section": part.cross_section,
         "weight": part.weight,
         "volume_m3": round(part.volume_m3, 6),
+        "has_joinery": part.has_joinery,
+        "position": (
+            {"x": part.position.x, "y": part.position.y, "z": part.position.z}
+            if part.position is not None
+            else None
+        ),
         "processings": [
-            {"type": p.type, "name": p.name, "params": dict(p.params)}
+            {
+                "type": p.type,
+                "name": p.name,
+                "category": p.category,
+                "params": dict(p.params),
+            }
             for p in part.processings
         ],
         "attrs": dict(part.attrs),
@@ -90,4 +101,45 @@ def cutlist_csv(file: BtlxFile) -> str:
     writer.writerow(_CUTLIST_HEADER)
     for row in cut_list(file):
         writer.writerow(_cutlist_record(row))
+    return buffer.getvalue()
+
+
+_PARTS_HEADER = [
+    "number",
+    "assembly",
+    "designation",
+    "material",
+    "timber_grade",
+    "count",
+    "length_mm",
+    "width_mm",
+    "height_mm",
+    "weight_kg",
+    "volume_m3",
+    "has_joinery",
+]
+
+
+def parts_csv(file: BtlxFile) -> str:
+    """Liste détaillée des pièces (une ligne par <Part>) au format CSV."""
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(_PARTS_HEADER)
+    for p in file.parts:
+        writer.writerow(
+            [
+                p.number,
+                p.assembly,
+                p.designation,
+                p.material,
+                p.timber_grade,
+                p.count,
+                round(p.length, 1),
+                round(p.width, 1),
+                round(p.height, 1),
+                p.weight if p.weight is not None else "",
+                round(p.volume_m3, 6),
+                "yes" if p.has_joinery else "no",
+            ]
+        )
     return buffer.getvalue()

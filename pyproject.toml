@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "btlx-parser"
-version = "1.0.0"
+version = "1.1.0"
 description = "Parser for the BTLx timber-construction exchange format (Hundegger & co.) — cut lists, volumes, structured data."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -29,8 +29,9 @@ secure = ["defusedxml>=0.7"]
 dev = ["pytest>=7", "pytest-cov>=4"]
 
 [project.urls]
-Homepage = "https://github.com/your-org/btlx-parser"
-Issues = "https://github.com/your-org/btlx-parser/issues"
+Homepage = "https://github.com/victorwhale/btlx-parser"
+Issues = "https://github.com/victorwhale/btlx-parser/issues"
+Changelog = "https://github.com/victorwhale/btlx-parser/blob/main/CHANGELOG.md"
 
 [project.scripts]
 btlx = "btlx.cli:main"

@@ -26,11 +26,19 @@ from .aggregate import (
     total_weight_kg,
 )
 from .errors import BtlxError, BtlxParseError
-from .exporters import cutlist_csv, file_to_dict, part_to_dict, to_json
-from .model import BtlxFile, FileDescription, Part, Processing, Project
+from .exporters import cutlist_csv, file_to_dict, part_to_dict, parts_csv, to_json
+from .model import (
+    PROCESSING_CATEGORIES,
+    BtlxFile,
+    FileDescription,
+    Part,
+    Position,
+    Processing,
+    Project,
+)
 from .parser import parse_file, parse_string
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 __all__ = [
     "__version__",
@@ -42,7 +50,9 @@ __all__ = [
     "FileDescription",
     "Project",
     "Part",
+    "Position",
     "Processing",
+    "PROCESSING_CATEGORIES",
     # agrégats
     "cut_list",
     "CutListRow",
@@ -55,6 +65,7 @@ __all__ = [
     # exports
     "to_json",
     "cutlist_csv",
+    "parts_csv",
     "file_to_dict",
     "part_to_dict",
     # erreurs
